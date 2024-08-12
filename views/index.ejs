@@ -1,0 +1,49 @@
+<body>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css"
+  ></link>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+  <section class="container">
+    <div class="card-body">
+      <div>
+        <h4 class="card-title">Scalable Chat app</h4>
+      </div>
+
+        <div id="chat-container"></div>
+      <form id="dataForm" class="row">
+        <input type="text" name="data" id="dataInput" class="form-control" required/>
+        <button type="submit" class="btn btn-secondary">
+          send
+        </button>
+      </form>
+    </div>
+  </section>
+  <script>
+    const socket = io();
+
+    document.getElementById('dataForm').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent the form from submitting the traditional way
+
+      const data = document.getElementById('dataInput').value;
+
+      socket.emit('event:message', data);
+    });
+
+    socket.on('message', function(data) {
+      let p = document.createElement('p');
+        p.classList.add('bg-secondary');
+        p.textContent = JSON.parse(data).message;
+
+        document.getElementById('chat-container').appendChild(p);
+    });
+
+    socket.on('connect', function() {
+      console.log('Socket.IO connection established');
+    });
+
+    socket.on('disconnect', function() {
+      console.log('Socket.IO connection closed');
+    });
+  </script>
+</body>
