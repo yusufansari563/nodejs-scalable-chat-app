@@ -70,6 +70,24 @@ services:
     volumes:
       - "mongo1_data:/data/db"
       - "mongo1_config:/data/configdb"
+  
+  prom-server:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus-config.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana-oss
+    ports:
+      - 3001:3000
+
+  loki:
+    image: grafana/loki
+    ports:
+      - 3100:3100
+
 volumes:
   mongo1_data:
   mongo1_config:

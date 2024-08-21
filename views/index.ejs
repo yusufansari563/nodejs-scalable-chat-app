@@ -1,49 +1,157 @@
 <body>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script
+    src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+    integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO"
+    crossorigin="anonymous"
+  ></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital@0;1&display=swap");
+  </style>
   <link
     rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css"
-  ></link>
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
-  <section class="container">
-    <div class="card-body">
-      <div>
-        <h4 class="card-title">Scalable Chat app</h4>
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <section class="px-3 py-5 border-1 border-red max-w-[1000px] m-auto">
+    <div>
+      <div class="">
+        <h4 class="text-2xl font-bold">Group Chat</h4>
       </div>
 
-        <div id="chat-container"></div>
-      <form id="dataForm" class="row">
-        <input type="text" name="data" id="dataInput" class="form-control" required/>
-        <button type="submit" class="btn btn-secondary">
-          send
+      <div
+        id="chat-container"
+        class="bg-gray-200 block h-3/4 border-0 rounded-lg justify-end content-end p-3 mt-4 overflow-y-scroll"
+      >
+      </div>
+      <form class="flex mt-2" id="dataForm" class="row">
+        <input
+          type="text"
+          name="data"
+          id="dataInput"
+          class="w-full rounded-lg border-0 py-2 shadow-sm px-2 bg-gray-200 focus:border-transparent active:border-transparent mr-2 tracking-wide"
+          placeholder="Message... "
+        />
+        <button type="submit" class="bg-gray-100 rounded-lg p-3">
+          <i class="fa-regular fa-paper-plane"></i>
         </button>
       </form>
     </div>
   </section>
+
+  <section id="name-model" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+  
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+          <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <input
+          type="text"
+          name="data"
+          id="data-input-name"
+          class="w-full rounded-lg border-0 py-2 shadow-sm px-2 border-gray-300 focus:border-transparent active:border-transparent mr-2 tracking-wide"
+          placeholder="Your Name..."
+        />
+
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <button id="name-save-model" type="button" class="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     const socket = io();
 
-    document.getElementById('dataForm').addEventListener('submit', function(event) {
-      event.preventDefault(); // Prevent the form from submitting the traditional way
+    let userName = '';
+    document.getElementById('name-save-model').addEventListener('click',()=>{
+      userName = document.getElementById('data-input-name').value;
+      document.getElementById("name-model").remove();
+    })
+    document
+      .getElementById("dataForm")
+      .addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent the form from submitting the traditional way
 
-      const data = document.getElementById('dataInput').value;
+        const data = document.getElementById("dataInput").value;
+        console.log(data);
+        
+        socket.emit("event:message", {text:data,name: userName});
+        this.reset();
+      });
 
-      socket.emit('event:message', data);
+    socket.on("message", function (data) {
+      let div = document.createElement("div");
+      div.classList.add(
+        "flex",
+        "justify-center",
+        "align-center",
+        "gap-2",
+        "mt-2"
+      );
+
+      // Create the <p> element and add classes
+      let pElement = document.createElement("p");
+      pElement.classList.add(
+        "bottom-0",
+        "right-4",
+        "p-2",
+        "w-3/4",
+        "bg-emerald-500",
+        "text-white",
+        "border-0",
+        "rounded-lg",
+        "font-bold",
+      );
+      pElement.textContent = JSON.parse(data).message.text; // Set the text content
+        console.log(JSON.parse(data).message);
+        
+      // Create the <i> element and add classes
+      let iElement = document.createElement("i");
+      iElement.classList.add(
+        "content-center",
+        "fa-regular",
+        "fa-user",
+        "text-white",
+        "bg-emerald-500",
+        "p-3",
+        "border-0",
+        "rounded-full",
+        "font-bold",
+      );
+
+      const spanElement = document.createElement('span');
+      spanElement.classList.add('ml-1','font-xs');
+      spanElement.textContent = JSON.parse(data).message.name;
+      if (spanElement.textContent !== userName) {
+        div.classList.add("flex-row-reverse");
+        pElement.classList.add('mr-auto');
+      }else{
+        pElement.classList.add('ml-auto');
+      }
+
+      // Append the elements to the div
+      div.append(pElement);
+      div.append(iElement);
+      iElement.append(spanElement);
+
+      // Append the div to the chat container
+      document.getElementById("chat-container").appendChild(div);
+      document.getElementById("chat-container").scroll(0,document.getElementById("chat-container").clientHeight)
     });
 
-    socket.on('message', function(data) {
-      let p = document.createElement('p');
-        p.classList.add('bg-secondary');
-        p.textContent = JSON.parse(data).message;
-
-        document.getElementById('chat-container').appendChild(p);
+    socket.on("connect", function () {
+      console.log("Socket.IO connection established");
     });
 
-    socket.on('connect', function() {
-      console.log('Socket.IO connection established');
-    });
-
-    socket.on('disconnect', function() {
-      console.log('Socket.IO connection closed');
+    socket.on("disconnect", function () {
+      console.log("Socket.IO connection closed");
     });
   </script>
 </body>

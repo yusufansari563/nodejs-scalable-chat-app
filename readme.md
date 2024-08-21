@@ -17,6 +17,7 @@
 > npm i
 > docker-compose up -d
 > npx prisma generate
+> npx ts-node index.ts
 ```
 Open `localhost:4555`
 
@@ -26,4 +27,17 @@ Follow below Article and enable one setting  which is
 ![Screenshot_2](https://miro.medium.com/v2/resize:fit:1400/format:webp/1*yeHnfVx9xOYlx-8C1lCxRQ.png)
 
 [Article to make mongo replicaSet in more detail]("https://medium.com/workleap/the-only-local-mongodb-replica-set-with-docker-compose-guide-youll-ever-need-2f0b74dd8384")
+
+### Analytics
+
+>  To check stats with redis open port
+
+`http://localhost:8001` 
+
+
+
+## Monitoring service
+
+prometheus metrics
+> http://localhost:4555/metrics
 

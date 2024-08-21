@@ -4,14 +4,13 @@ import express from "express";
 import bodyParser from "body-parser";
 import SocketService from "./core/socket";
 import { startMessageConsumer } from "./core/kafka";
+import { init as promClient } from './core/prom-client';
 
 const app = express();
+promClient(app);
 
 app.set("view engine", "ejs");
-// app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-
-// const mongoConn = mongo();
 
 const redisConn = redis();
 
@@ -19,7 +18,7 @@ async function init() {
   startMessageConsumer();
   const socketService = new SocketService();
 
-  
+
   const server = app.listen("4555", () => {
     console.log("server started at 4555");
   });
@@ -38,19 +37,6 @@ async function init() {
       msg: "pong",
     });
   });
-
-  // io.on('connection', (socket) => {
-  //   console.log('A user connected');
-  
-  //   socket.on('submitData', (data) => {
-  //     console.log('Received data:', data);
-  //     socket.emit('responseData', `Received: ${data}`);
-  //   });
-  
-  //   socket.on('disconnect', () => {
-  //     console.log('User disconnected');
-  //   });
-  // });
 
   socketService.initListeners();
 }
