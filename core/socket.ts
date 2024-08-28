@@ -9,6 +9,7 @@ class socketService {
   constructor() {
     console.log("Init Socket Service...");
     this._io = new _Server({
+      transports: ['websocket'],
       cors: {
         allowedHeaders: ["*"],
         origin: "*",

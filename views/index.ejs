@@ -67,7 +67,9 @@
     </div>
   </div>
   <script>
-    const socket = io();
+    const socket = io('host.docker.internal:4555', {
+      transports: ['websocket']
+    });
 
     let userName = '';
     document.getElementById('name-save-model').addEventListener('click',()=>{

@@ -22,7 +22,7 @@ services:
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://host.docker.internal:9092
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
@@ -52,8 +52,8 @@ services:
   #     - postgres
 
   mongo-replicasets:
-  # https://medium.com/workleap/the-only-local-mongodb-replica-set-with-docker-compose-guide-youll-ever-need-2f0b74dd8384
-  # check above article before running replicaset as we are using docker so need to enable the one setting from docker general
+    # https://medium.com/workleap/the-only-local-mongodb-replica-set-with-docker-compose-guide-youll-ever-need-2f0b74dd8384
+    # check above article before running replicaset as we are using docker so need to enable the one setting from docker general
     image: mongo:7.0
     command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
     ports:
@@ -70,7 +70,7 @@ services:
     volumes:
       - "mongo1_data:/data/db"
       - "mongo1_config:/data/configdb"
-  
+
   prom-server:
     image: prom/prometheus
     ports:
@@ -87,6 +87,48 @@ services:
     image: grafana/loki
     ports:
       - 3100:3100
+
+  lb:
+    image: haproxy
+    ports:
+      - "4555:4555"
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy
+    
+  wsapp:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: wsapp:latest
+    container_name: wsapp
+
+  ws1:
+    image: wsapp:latest
+    environment:
+      - APPID=1111
+    depends_on:
+      - wsapp
+
+  ws2:
+    image: wsapp:latest
+    environment:
+      - APPID=2222
+    depends_on:
+      - wsapp
+
+  ws3:
+    image: wsapp:latest
+    environment:
+      - APPID=3333
+    depends_on:
+      - wsapp
+
+  ws4:
+    image: wsapp:latest
+    environment:
+      - APPID=4444
+    depends_on:
+      - wsapp
 
 volumes:
   mongo1_data:

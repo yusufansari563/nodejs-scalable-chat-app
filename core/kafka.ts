@@ -1,17 +1,32 @@
 import { Kafka, Producer } from "kafkajs";
 import prismaClient from "./prisma";
+import { collectDefaultMetrics, Registry } from "prom-client";
+import { monitorKafkaJSProducer, monitorKafkaJSConsumer, monitorKafkaJSAdmin } from "@christiangalsterer/kafkajs-prometheus-exporter";
 
 let producer: Producer | null = null;
 
+const clientId= "app";
 const kafka = new Kafka({
-    clientId: "app",
-    brokers: ["localhost:9092"],
+    clientId: clientId,
+    brokers: ["host.docker.internal:9092"],
 });
+
+
+const admin = kafka.admin()
+
+// set up the prometheus client
+const register = new Registry();
+collectDefaultMetrics({ register })
+
+// monitor KafkaJS admin
+// kafkaExporter.monitorKafkaJSAdmin(admin, register, { defaultLabels: {client_id: clientId} })
+
 
 async function createProducer() {
     if (producer) return producer;
 
     const _producer = kafka.producer();
+    monitorKafkaJSProducer(_producer, register, { defaultLabels: {client_id: clientId} })
     await _producer.connect();
     producer = _producer;
     return producer;
@@ -31,6 +46,7 @@ let manyMsg:any[] = [];
 export async function startMessageConsumer() {
     console.log("Consumer is running..");
     const consumer = kafka.consumer({ groupId: "default" });
+    monitorKafkaJSConsumer(consumer, register, { defaultLabels: {client_id: clientId} })
     await consumer.connect();
     await consumer.subscribe({ topic: "MESSAGES", fromBeginning: true });
 
